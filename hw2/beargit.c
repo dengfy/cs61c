@@ -215,7 +215,7 @@ void next_id(char* id, int n) {
     }
 }
 
-void next_commit_id(char* commit_id) {
+void next_commit_id_hw1(char* commit_id) {
   /* COMPLETE THE REST */
 	int length = 0;
 	while(commit_id[length] != '\0') {
@@ -232,7 +232,7 @@ void next_commit_id(char* commit_id) {
 	} 
 }
 
-int beargit_commit(const char* msg) {
+int beargit_commit_hw1(const char* msg) {
   if (!is_commit_msg_ok(msg)) {
     fprintf(stderr, "ERROR: Message must contain \"%s\"\n", go_bears);
     return 1;

@@ -1,13 +1,4 @@
-<<<<<<< HEAD
-beargit: main.c beargit.c beargit.h util.h
-	gcc -std=c99 main.c beargit.c -o beargit
-
-clean:
-	rm -rf beargit autotest test
-
-check::
-=======
-CUNIT := -L/home/ff/cs61c/cunit/install/lib -I/home/ff/cs61c/cunit/install/include -lcunit
+CUNIT := -L/home/qiangd/cunit/install/lib -I/home/qiangd/cunit/install/include -lcunit
 
 beargit: main.c beargit.c util.c beargit.h util.h
 	gcc -g -std=c99 main.c beargit.c util.c -o beargit
@@ -19,7 +10,7 @@ clean:
 	rm -rf beargit autotest test beargit-unittest TEST_STDOUT TEST_STDERR
 
 check: beargit
->>>>>>> hw2_starter/master
+
 ifndef INSTMANPATH
 	$(error You need to run 'make check' on an instructional machine, such as hive*.cs.berkeley.edu)
 endif
