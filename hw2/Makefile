@@ -1,4 +1,4 @@
-CUNIT := -L/usr/local/lib -I/usr/local/include/CUnit -lcunit
+CUNIT := -lcunit
 
 beargit: main.c beargit.c util.c beargit.h util.h
 	gcc -g -std=c99 main.c beargit.c util.c -o beargit
