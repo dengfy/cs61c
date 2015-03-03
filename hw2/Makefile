@@ -1,4 +1,4 @@
-CUNIT := -L/home/qiangd/cunit/install/lib -I/home/qiangd/cunit/install/include -lcunit
+CUNIT := -L/usr/local/lib -I/usr/local/include/CUnit -lcunit
 
 beargit: main.c beargit.c util.c beargit.h util.h
 	gcc -g -std=c99 main.c beargit.c util.c -o beargit
