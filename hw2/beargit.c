@@ -217,19 +217,20 @@ void next_id(char* id, int n) {
 
 void next_commit_id_hw1(char* commit_id) {
   /* COMPLETE THE REST */
-	int length = 0;
-	while(commit_id[length] != '\0') {
-		length++;
-	}
+    int length = 0;
+    while(commit_id[length] != '\0') {
+        length++;
+    }
 
-	if (commit_id[0] == '0') {
-		int i;
-    	for (i = 0; i < length; i++) {
+    if (commit_id[0] == '0') {
+        int i;
+        for (i = 0; i < length; i++) {
             commit_id[i] = '6';
-    	}
-	}else{
-		next_id(commit_id, length);
-	} 
+        }
+    }else{
+        next_id(commit_id, length);
+    }
+
 }
 
 int beargit_commit_hw1(const char* msg) {
@@ -423,6 +424,26 @@ int get_branch_number(const char* branch_name) {
 
 int beargit_branch() {
   /* COMPLETE THE REST */
+  FILE* fbranches = fopen(".beargit/.branches", "r");
+  
+  char current_branch[BRANCHNAME_SIZE];
+  read_string_from_file(".beargit/.current_branch", current_branch, BRANCHNAME_SIZE);
+  
+  /* current_branch is None if detached*/
+ 
+  char line[FILENAME_SIZE];
+  while(fgets(line, sizeof(line), fbranches)) {
+    strtok(line, "\n");
+    if (strcmp(line, current_branch) == 0) {
+	  fprintf(stdout, "* %s\n", line);      
+    }else {
+	  fprintf(stdout, "  %s\n", line);
+	}
+
+  }
+
+  fclose(fbranches);
+
 
   return 0;
 }
@@ -435,18 +456,61 @@ int beargit_branch() {
 
 int checkout_commit(const char* commit_id) {
   /* COMPLETE THE REST */
+  FILE* findex = fopen(".beargit/.index", "r");
+
+  char line[FILENAME_SIZE];
+  while(fgets(line, sizeof(line), findex)) {
+    strtok(line, "\n");
+	fs_rm(line);
+  }
+  fclose(findex);
+
+  char commit_dir[COMMIT_ID_SIZE] = ".beargit/";
+  strcat(commit_dir, commit_id);
+  char* new_commit_index = concat(commit_dir, "/.index");
+  fs_cp(new_commit_index, ".beargit/.index");
+
+  FILE* fnewindex = fopen(new_commit_index, "r");
+  
+  char line1[FILENAME_SIZE];
+  while(fgets(line1, sizeof(line1), fnewindex)) {
+    strtok(line1, "\n");
+	char* tmp = concat(commit_dir, "/");
+	char* tracked_file = concat(tmp, line1);
+    fs_cp(tracked_file, line1);
+	free(tmp);
+	free(tracked_file);
+  }
+  fclose(fnewindex);
+  free(new_commit_index);  
+
+  FILE* prev_file = fopen(".beargit/.prev", "w");
+  fclose(prev_file);
+  write_string_to_file(".beargit/.prev", commit_id);
+  
+
   return 0;
 }
 
 int is_it_a_commit_id(const char* commit_id) {
   /* COMPLETE THE REST */
+  int length = strlen(commit_id);
+  if (length != 40) {
+  	return 0;
+  }
+  int i;
+  for (i = 0; i < length; i++) {
+	if ((commit_id[i] != '6') && (commit_id[i] != '1') && (commit_id[i] != 'c')) {
+	  return 0;
+	}
+  }
   return 1;
 }
 
 int beargit_checkout(const char* arg, int new_branch) {
   // Get the current branch
   char current_branch[BRANCHNAME_SIZE];
-  read_string_from_file(".beargit/.current_branch", "current_branch", BRANCHNAME_SIZE);
+  read_string_from_file(".beargit/.current_branch", current_branch, BRANCHNAME_SIZE);
 
   // If not detached, update the current branch by storing the current HEAD into that branch's file...
   // Even if we cancel later, this is still ok.
@@ -458,6 +522,7 @@ int beargit_checkout(const char* arg, int new_branch) {
 
   // Check whether the argument is a commit ID. If yes, we just stay in detached mode
   // without actually having to change into any other branch.
+
   if (is_it_a_commit_id(arg)) {
     char commit_dir[FILENAME_SIZE] = ".beargit/";
     strcat(commit_dir, arg);
@@ -471,7 +536,6 @@ int beargit_checkout(const char* arg, int new_branch) {
 
     return checkout_commit(arg);
   }
-
   // Just a better name, since we now know the argument is a branch name.
   const char* branch_name = arg;
 
@@ -482,13 +546,12 @@ int beargit_checkout(const char* arg, int new_branch) {
   if (!(!branch_exists || !new_branch)) {
     fprintf(stderr, "ERROR: A branch named %s already exists\n", branch_name);
     return 1;
-  } else if (!branch_exists && new_branch) {
+  } else if (!branch_exists && !new_branch) {
     fprintf(stderr, "ERROR: No branch %s exists\n", branch_name);
     return 1;
   }
-
   // File for the branch we are changing into.
-  char* branch_file = ".beargit/.branch_"; 
+  char branch_file[BRANCHNAME_SIZE] = ".beargit/.branch_"; 
   strcat(branch_file, branch_name);
 
   // Update the branch file if new branch is created (now it can't go wrong anymore)
